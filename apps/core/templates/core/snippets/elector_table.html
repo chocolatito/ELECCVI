@@ -1,0 +1,31 @@
+<table class="table bg-primary text-light" id="data">
+  <thead>
+    <tr>
+      <th class="text-right">DNI</th>
+      <th class="text-right">Nombre/s</th>
+      <th class="text-left">Apellido/s</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody class="text-dark">
+    {% for elector in object_list %}
+      <tr>
+        <td  class="text-right">{{elector.dni}}</td>
+        <td class="text-right">{{elector.names}}</td>
+        <td class="text-left">{{elector.surnames}}</td>
+        <td>
+          <!-- If record is active -->
+          {% if elector.active %}
+          <div class="btn-group" >
+            <a href={% url 'core:edit-elector' elector.id %} class="btn btn-warning"> Editar </button>
+            <a class="btn btn-danger" href={% url 'core:deactive_elector' elector.id %} name="deactive">Desactivar</a>
+          </div>
+          {% else %}
+            <a class="btn btn-success" href={% url 'core:active_elector' elector.id %} name="active">Activar</a>
+          {% endif %}
+        </td>
+
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

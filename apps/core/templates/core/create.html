@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}CREAR ELECTOR{% endblock %}
+{% block content %}
+<div class="row bg-secondary">
+    <div class="col-sm-4"></div>
+    <div class="col-sm-4">
+      {% if void_select_field %}
+        {% for message in add_new_message %}
+          <div class="h1 bg-light mt-1">
+            {{ message.0 }}
+            <br>
+            <a class="btn btn-block btn-primary mt-1" href={{message.1}}>Registrar Ahora</a>
+          </div>
+
+        {% endfor %}
+      {% else %}
+      <div class="card">
+        <form method="post">
+          {% csrf_token %}
+          <div class="card-header text-center"><h5>{{form_title}}</h5></div>
+          <div class="card-body">
+            {% for field in form.visible_fields %}
+              <label class="font-weight-bold">{{field.label}}</label>
+              <div class="form-group">
+                {% if field.field.widget.input_type == "select" %}
+                  <div class="row">
+                    <div class="col-sm-8">{{field}}</div>
+                    <div class="col-sm-2"><a class="btn btn-primary" href="#">Nuevo</a></div>
+                  </div>
+                {% else %}
+                  {{field}}
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          <div class="card-footer">
+            <button class="btn-block btn-lg btn-primary">Registrar</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    <div class="col-sm-4">{{form.errors}}</div>
+</div>
+{% endblock %}

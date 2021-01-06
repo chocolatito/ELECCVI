@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head %}
+  {% include "core/snippets/datatable_files.html" %}
+{% endblock %}
+{% block content %}
+{% if object  %}
+  <div class="row justify-content-center">
+    <div class="col">
+      <h2>Padron {{object}}</h2>
+      <form method="POST">
+      {% csrf_token %}
+        <button type="submit" class="btn btn-danger" name="remove">Quitar</button>
+        <div class="container">
+          {% comment %}
+            include "core/snippets/table.html" with
+              table_id="data"
+              electores=object.electores.all
+              checkbox_id="checkall_enabled"
+              checkbox_name="elector_enabled"
+              table_class="table bg-primary text-light"
+          {% endcomment %}
+          {% include "core/snippets/padron_table.html" with table_id="data" checkbox_id="checkall_enabled" checkbox_name="elector_enabled"%}
+        </div>
+      </form>
+    </div>
+    <div class="col">
+      <div class="container">
+        <h2>EL RESTO DE LOS ELECTORES</h2>
+        <form method="POST">
+        {% csrf_token %}
+          <button type="submit" class="btn btn-primary" name="add">Agregar</button>
+          {% comment %}
+            include "core/snippets/table.html" with
+              table_id="data2"
+              electores=expelled.all
+              checkbox_id="checkall_disabled"
+              checkbox_name="elector_disabled"
+              table_class="table bg-primary text-light"
+          {% endcomment %}
+          {% include "core/snippets/padron_table.html" with table_id="data2" checkbox_id="checkall_disabled" checkbox_name="elector_disabled"%}
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+    <h3>Mal</h3>
+  {% endif %}
+{% endblock %}
+
+{% block javascript %}
+  {% include "core/snippets/datatable_script.html" %}
+  {% include "core/snippets/datatable_script_checkall.html" %}
+{% endblock %}

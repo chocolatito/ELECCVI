@@ -1,0 +1,8 @@
+<div class="row mb-3">
+  <div class="col-md-4 well"><a class="btn btn-block btn-primary" href={% url create_url %}>Nuevo Registro</a></div>
+  <div class="col-md-8 well">
+    <a class="btn btn-secondary" href={% url list_url %}>Todos los registros</a>
+    <a class="btn btn-success" href={% url list_url %}?estado=activo>Solo  Activos </a>
+    <a class="btn btn-danger" href={% url list_url %}?estado=inactivo>Solo Inactivos</a>
+  </div>
+</div>

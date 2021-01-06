@@ -1,0 +1,7 @@
+<div class="container text-center">
+  {% if estado == "activo" or estado == "inactivo" %}
+    <br><h2>No hay registros con estado {{estado}}</h2>
+  {% else %}
+    <br><h2>{{message_no_queryset}}</h2>
+  {% endif %}
+</div>
