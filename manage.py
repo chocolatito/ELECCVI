@@ -6,8 +6,8 @@ import sys
 
 def main():
     # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'conf.settings')
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'conf.settings.local')
-    # os.environ["DJANGO_SETTINGS_MODULE"] = "conf.settings.production"
+    # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'conf.settings.local')
+    os.environ["DJANGO_SETTINGS_MODULE"] = "conf.settings.production"
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # environ init
 env = environ.Env()
 environ.Env.read_env()
-
+print(env.str('SECRET_KEY'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -76,6 +76,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': ['templates'],
+        'DIRS': ["/home/danielivan/EleccionVirtual/templates", ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -128,4 +129,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+#STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+#print(f'***********\n{STATIC_URL}\n\t{STATICFILES_DIRS}')
+print(BASE_DIR)
