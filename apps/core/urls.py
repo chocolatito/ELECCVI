@@ -1,24 +1,27 @@
+from .views import (CandidatoListView,
+                    CandidatoCreateView, CandidatoUpdateView,
+                    active_candidato, deactive_candidato,
+                    CargoListView, CargoCreateView, CargoUpdateView,
+                    active_cargo, deactive_cargo,
+                    EleccionListView, EleccionDetailView,
+                    EleccionCreateView, EleccionUpdateView,
+                    active_eleccion, deactive_eleccion,
+                    ElectorListView,
+                    ElectorCreateView, ElectorUpdateView, EleccionProgramar,
+                    active_elector, deactive_elector,
+                    programar_eleccion,
+                    PadronListView, PadronDetailView,
+                    PadronCreateView, PadronUpdateView,
+                    active_padron, deactive_padron,
+                    )
+from django.urls import path
 """conf URL Configuration
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.0/topics/http/urls/
 """
-from django.urls import path
-from .views import (index,
-                    ElectorListView,
-                    ElectorCreateView, ElectorUpdateView,
-                    active_elector, deactive_elector,
-                    PadronListView, PadronDetailView,
-                    active_padron, deactive_padron,
-                    CargoListView, CargoCreateView, CargoUpdateView,
-                    active_cargo, deactive_cargo,
-                    EleccionListView,
-                    EleccionCreateView, EleccionUpdateView,
-                    CandidatoCreateView, CandidatoUpdateView,
-                    PadronCreateView, PadronUpdateView)
 
 app_name = 'core'
 urlpatterns = [
-    path('', index, name='index'),
     # Elector
     path('create_elector/', ElectorCreateView.as_view(), name='create-elector'),
     path('elector/<int:pk>/', ElectorUpdateView.as_view(), name='elector-detail'),
@@ -39,12 +42,19 @@ urlpatterns = [
     path('cargos/', CargoListView.as_view(), name='cargo-list'),
     path('cargos/active/<int:pk>', active_cargo, name='active_cargo'),
     path('cargos/deactive/<int:pk>', deactive_cargo, name='deactive_cargo'),
-    # Eleccion
+    # Eleccion EleccionProgramar
     path('elecciones/', EleccionListView.as_view(), name='eleccion-list'),
+    path('eleccion/<int:pk>/', EleccionDetailView.as_view(), name='eleccion-detail'),
     path('create_eleccion/', EleccionCreateView.as_view(), name='create-eleccion'),
     path('edit_eleccion/<int:pk>', EleccionUpdateView.as_view(), name='edit-eleccion'),
+    path('elecciones/active/<int:pk>', active_eleccion, name='active_eleccion'),
+    path('elecciones/deactive/<int:pk>', deactive_eleccion, name='deactive_eleccion'),
+    path('elecciones/programar/<int:pk>', EleccionProgramar.as_view(), name='programar-eleccion'),
     # Candidato
+    path('candidatos/', CandidatoListView.as_view(), name='candidato-list'),
     path('create_candidato/', CandidatoCreateView.as_view(), name='create-candidato'),
     path('edit_candidato/<int:pk>', CandidatoUpdateView.as_view(), name='edit-candidato'),
+    path('candidatos/active/<int:pk>', active_candidato, name='active_candidato'),
+    path('candidatos/deactive/<int:pk>', deactive_candidato, name='deactive_candidato'),
 
 ]

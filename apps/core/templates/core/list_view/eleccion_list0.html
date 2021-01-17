@@ -1,0 +1,79 @@
+{% extends "list_base.html" %}
+{% load static %}
+{% block main %}
+<!-- Card with card-header-tabs -->
+<div class="container">
+  <div class="card-fluid">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs" id="eleccion-list" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" href="#pasadas" role="tab" aria-controls="pasadas" aria-selected="true">
+            Pasadas
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#proximas" role="tab" aria-controls="proximas" aria-selected="false">
+            Proximas
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#encurso" role="tab" aria-controls="encurso" aria-selected="false">
+            En Curso
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="card-body">
+      <h4 class="card-title">TITULO</h4>
+      <h6 class="card-subtitle mb-2">Subtitulo</h6>
+      <div class="tab-content mt-3">
+        <div class="tab-pane active" id="pasadas" role="tabpanel">
+          <p class="card-text">Tablas elecciones pasadas</p>
+          {% if elecciones_pasadas %}
+          <div class="table-responsive">
+            {% include "core/snippets/table_elecciones.html" with object_list=elecciones_pasadas hidden="d-none"%}
+          </div>
+          {% else %}
+          {% include "core/snippets/no_objetc_list_eleccion.html" with status="pasadas" hidden="d-none"%}
+          {% endif %}
+        </div>
+
+        <div class="tab-pane" id="proximas" role="tabpanel" aria-labelledby="history-tab">
+          {% if elecciones_proximas %}
+          <div class="table-responsive">
+            {% include "core/snippets/table_elecciones.html" with object_list=elecciones_proximas hidden=""%}
+          </div>
+          {% else %}
+          {% include "core/snippets/no_objetc_list_eleccion.html" with status="proximas" %}
+          {% endif %}
+        </div>
+
+        <div class="tab-pane" id="encurso" role="tabpanel" aria-labelledby="deals-tab">
+          {% if elecciones_encurso %}
+          {% include "core/snippets/table_elecciones.html" with object_list=elecciones_encurso hidden=""%}
+          {% else %}
+          {% include "core/snippets/no_objetc_list_eleccion.html" with status="en curso" %}
+          {% endif %}
+          <a href="#" class="btn btn-danger btn-sm">LINK</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Card with card-header-tabs -->
+{% endblock %}
+{% block script_dataTable %}
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('#data').DataTable({
+      "scrollY": "400px",
+      "scrollCollapse": true,
+      "paging": false,
+    });
+    $("#eleccion-list a").on("click", function(e) {
+      e.preventDefault();
+      $(this).tab("show");
+    });
+  });
+</script>
+{% endblock %}

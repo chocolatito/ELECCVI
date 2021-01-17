@@ -1,3 +1,9 @@
+from .forms import (ElectorCreateForm, ElectorEditForm,
+                    PadronForm,
+                    CargoForm,
+                    EleccionForm, EleccionProgamadaForm,
+                    CandidatoForm)
+from .models import Padron, Elector, Cargo, Eleccion, Candidato
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -8,41 +14,56 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
-
-from .utils import set_active, get_queryset_by_state, enable_form
-from .models import Padron, Elector, Cargo, Eleccion, Candidato
-from .forms import (ElectorCreateForm, ElectorEditForm,
-                    PadronForm,
-                    CargoForm,
-                    EleccionForm,
-                    CandidatoForm)
+##
+from django_q.models import Schedule
+from .utils import (set_active,
+                    get_queryset_by_state,
+                    get_queryset_for_estatus,
+                    enable_form,
+                    set_estatus,
+                    )
+# from .schedule import scheduleTask, stopScheduleTask
 # Create your views here.
-
-
-@login_required(login_url='login')
-def index(request):
-    return render(request,
-                  'index.html',
-                  {'sumary': {'Padrones': Padron.objects.all().count(),
-                              'Electores': Elector.objects.all().count(),
-                              'Cargos': Cargo.objects.all().count(),
-                              'Elecciones': Eleccion.objects.all().count(),
-                              'Candidatos': Candidato.objects.all().count()}})
 
 
 # _Eleccion
 class EleccionListView(LoginRequiredMixin, ListView):
     model = Eleccion
+    template_name = "core/list_view/eleccion_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = "Listado de Elecciones"
-        context['message_no_queryset'] = 'No hay elecciones registradas'
-        context['object_list'] = get_queryset_by_state(self.model,
-                                                       self.request.GET.get('estado'))
+        context['entity'] = "Elecciones pasadas"
+        context['message_no_queryset'] = 'No hay elecciones pasadas registradas'
+        context['elecciones_pasadas'] = get_queryset_for_estatus(self.model,
+                                                                 self.request.GET.get('estado'),
+                                                                 [3, 4])
+        context['elecciones_pendientes'] = get_queryset_for_estatus(self.model,
+                                                                    self.request.GET.get('estado'),
+                                                                    [0, ])
+
+        context['elecciones_programadas'] = get_queryset_for_estatus(self.model,
+                                                                     self.request.GET.get('estado'),
+                                                                     [1, 2])
         context['estado'] = self.request.GET.get('estado')
         context['create_url'] = 'core:create-eleccion'
         context['list_url'] = 'core:eleccion-list'
+        context['detail_url'] = 'core:eleccion-detail'
+        context['edit_url'] = 'core:edit-eleccion'
+        context['active_url'] = 'core:active_eleccion'
+        context['deactive_url'] = 'core:deactive_eleccion'
+        context['thead'] = ['Eleccion', 'Cargo', 'Fecha', 'Inicio-Cierre', 'Estado']
+        return context
+
+
+class EleccionDetailView(DetailView):
+    model = Eleccion
+    template_name = "core/detail_view/eleccion_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = "Eleccion"
         return context
 
 
@@ -89,17 +110,90 @@ class EleccionUpdateView(UpdateView):
         return context
 
 
+class EleccionProgramar(UpdateView):
+    model = Eleccion
+    form_class = EleccionProgamadaForm
+    template_name = "core/create.html"
+    success_url = reverse_lazy('core:eleccion-list')
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            obj = form.save()
+            set_estatus(obj, 1)
+            #
+            t1 = Schedule.objects.create(name=f'{obj.id} st2: {obj.get_start_datetime()}',
+                                         func='apps.core.tasks.set_status',
+                                         args=f'{obj.id},{2}',
+                                         schedule_type='O',
+                                         repeats=1,
+                                         next_run=obj.get_start_datetime()
+                                         )
+            t2 = Schedule.objects.create(name=f'{obj.id} st3: {obj.get_end_datetime()}',
+                                         func='apps.core.tasks.set_status',
+                                         args=f'{obj.id},{3}',
+                                         schedule_type='O',
+                                         repeats=1,
+                                         next_run=obj.get_end_datetime()
+                                         )
+            print(f'\nTaraea 1: {t1.next_run}\nTaraea 2: {t2.next_run}---\n')
+            print(f'\nFin{obj.get_end_datetime()}\nInicio: {obj.get_start_datetime()}')
+            #
+            return redirect('core:eleccion-detail', pk=obj.id)
+        self.object = None
+        context = self.get_context_data(**kwargs)
+        context['form'] = form
+        return render(request, self.template_name, context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = "Horario de Inicio-Cierre"
+        return context
+
+
+@ login_required(login_url='usuarios:login')
+def active_eleccion(request, pk):
+    set_active(Eleccion.objects.get(pk=pk), True)
+    return redirect('core:eleccion-list')
+
+
+@ login_required(login_url='usuarios:login')
+def deactive_eleccion(request, pk):
+    set_active(Eleccion.objects.get(pk=pk), False)
+    return redirect('core:eleccion-list')
+
+
+@ login_required(login_url='usuarios:login')
+def programar_eleccion(request, pk):
+    set_estatus(Eleccion.objects.get(pk=pk), 1)
+    return redirect('core:eleccion-detail', pk=pk)
+
+
+@ login_required(login_url='usuarios:login')
+def posponer_eleccion(request, pk):
+    set_estatus(Eleccion.objects.get(pk=pk), 5)
+    return redirect('core:eleccion-list')
+
+
 # _Elector
+
+
 class ElectorListView(ListView):
     model = Elector
+    template_name = "core/list_view/elector_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = "Listado de Electores"
+        context['entity'] = "Electores"
         context['object_list'] = get_queryset_by_state(self.model,
                                                        self.request.GET.get('estado'))
         context['estado'] = self.request.GET.get('estado')
-        context['create_url'] = 'create-user'
+        context['create_url'] = 'usuarios:create-user'
         context['list_url'] = 'core:elector-list'
         context['detail_url'] = 'core:elector-detail'
         context['edit_url'] = 'core:edit-elector'
@@ -107,18 +201,6 @@ class ElectorListView(ListView):
         context['deactive_url'] = 'core:deactive_elector'
         context['thead'] = ['DNI', 'Nombre/s', 'Apellido/s', 'Usuario']
         return context
-
-
-@ login_required(login_url='login')
-def active_elector(request, pk):
-    set_active(Elector.objects.get(pk=pk), True)
-    return redirect('core:elector-list')
-
-
-@ login_required(login_url='login')
-def deactive_elector(request, pk):
-    set_active(Elector.objects.get(pk=pk), False)
-    return redirect('core:elector-list')
 
 
 class ElectorCreateView(CreateView):
@@ -155,13 +237,27 @@ class ElectorUpdateView(UpdateView):
         return context
 
 
+@ login_required(login_url='usuarios:login')
+def active_elector(request, pk):
+    set_active(Elector.objects.get(pk=pk), True)
+    return redirect('core:elector-list')
+
+
+@ login_required(login_url='usuarios:login')
+def deactive_elector(request, pk):
+    set_active(Elector.objects.get(pk=pk), False)
+    return redirect('core:elector-list')
+
+
 # _Padron
 class PadronListView(ListView):
     model = Padron
+    template_name = "core/list_view/padron_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = "Listado de Padrones"
+        context['entity'] = "Padrones"
         context['message_no_queryset'] = 'No hay padrones registrados'
         context['object_list'] = get_queryset_by_state(self.model,
                                                        self.request.GET.get('estado'))
@@ -176,20 +272,7 @@ class PadronListView(ListView):
         return context
 
 
-@ login_required(login_url='login')
-def active_padron(request, pk):
-    set_active(Padron.objects.get(pk=pk), True)
-    return redirect('core:padron-list')
-
-
-@ login_required(login_url='login')
-def deactive_padron(request, pk):
-    set_active(Padron.objects.get(pk=pk), False)
-    return redirect('core:padron-list')
-
-
 class PadronDetailView(DetailView):
-
     model = Padron
 
     def get_context_data(self, **kwargs):
@@ -197,7 +280,7 @@ class PadronDetailView(DetailView):
         context['title'] = "Padron"
         id_list = list(self.object.electores.all().values_list('id', flat=True))
         context['expelled'] = Elector.objects.exclude(id__in=id_list)
-        context['thead'] = ['DNI', 'Nombre/s', 'Apellido/s', 'Usuario']
+        context['thead'] = ['DNI', 'Nombre/s', 'Apellido/s']
         return context
 
     def post(self, request, *args, **kwargs):
@@ -248,29 +331,49 @@ class PadronUpdateView(UpdateView):
         return context
 
 
+@ login_required(login_url='usuarios:login')
+def active_padron(request, pk):
+    set_active(Padron.objects.get(pk=pk), True)
+    return redirect('core:padron-list')
+
+
+@ login_required(login_url='usuarios:login')
+def deactive_padron(request, pk):
+    set_active(Padron.objects.get(pk=pk), False)
+    return redirect('core:padron-list')
+
+
 # _Cargo
 class CargoListView(ListView):
     model = Cargo
+    template_name = "core/list_view/cargo_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = "Listado de Cargo"
+        context['entity'] = "Cargos"
         context['message_no_queryset'] = 'No hay cargos registrados'
         context['object_list'] = get_queryset_by_state(self.model,
                                                        self.request.GET.get('estado'))
         context['estado'] = self.request.GET.get('estado')
         context['create_url'] = 'core:create-cargo'
         context['list_url'] = 'core:cargo-list'
+        # -- COMPLETAR
+        context['detail_url'] = 'core:edit-cargo'
+        context['edit_url'] = 'core:edit-cargo'
+        context['active_url'] = 'core:active_cargo'
+        context['deactive_url'] = 'core:deactive_cargo'
+        context['thead'] = ['Cargo', 'Descripción']
         return context
 
 
-@ login_required(login_url='login')
+@ login_required(login_url='usuarios:login')
 def active_cargo(request, pk):
     set_active(Cargo.objects.get(pk=pk), True)
     return redirect('core:cargo-list')
 
 
-@ login_required(login_url='login')
+@ login_required(login_url='usuarios:login')
 def deactive_cargo(request, pk):
     set_active(Cargo.objects.get(pk=pk), False)
     return redirect('core:cargo-list')
@@ -311,11 +414,33 @@ class CargoUpdateView(UpdateView):
 
 
 # _Candidato
+class CandidatoListView(LoginRequiredMixin, ListView):
+    model = Candidato
+    template_name = "core/list_view/candidato_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = "Listado de Candidatos"
+        context['entity'] = "Candidatos"
+        context['message_no_queryset'] = 'No hay candidatos registrados'
+        context['object_list'] = get_queryset_by_state(self.model,
+                                                       self.request.GET.get('estado'))
+        context['estado'] = self.request.GET.get('estado')
+        context['create_url'] = 'core:create-candidato'
+        context['list_url'] = 'core:candidato-list'
+        context['detail_url'] = 'core:edit-candidato'  # 'core:candidato-detail'
+        context['edit_url'] = 'core:edit-candidato'
+        context['active_url'] = 'core:active_candidato'
+        context['deactive_url'] = 'core:deactive_candidato'
+        context['thead'] = ['Postulación', 'Cargo', 'Elector', 'Eleccion']
+        return context
+
+
 class CandidatoCreateView(CreateView):
     model = Candidato
     form_class = CandidatoForm
     template_name = "core/create.html"
-    success_url = reverse_lazy('core:cargo-list')
+    success_url = reverse_lazy('core:candidato-list')
 
     def post(self, request, *args, **kwargs):
         form = CandidatoForm(request.POST)
@@ -329,6 +454,7 @@ class CandidatoCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['id'] = self.request.GET.get('id')
         context['form_title'] = "Registrar un candidato"
         return context
 
@@ -343,3 +469,15 @@ class CandidatoUpdateView(UpdateView):
         context = super().get_context_data(**kwargs)
         context['form_title'] = "Editar datos del candidato"
         return context
+
+
+@ login_required(login_url='usuarios:login')
+def active_candidato(request, pk):
+    set_active(Cargo.objects.get(pk=pk), True)
+    return redirect('core:candidato-list')
+
+
+@ login_required(login_url='usuarios:login')
+def deactive_candidato(request, pk):
+    set_active(Cargo.objects.get(pk=pk), False)
+    return redirect('core:candidato-list')

@@ -1,18 +1,18 @@
-<table class="table bg-primary text-light" id="data">
+<table class="table table-bordered" id="data" width="100%" cellspacing="0">
   <thead>
     <tr>
-      <th class="text-right">DNI</th>
-      <th class="text-right">Nombre/s</th>
-      <th class="text-left">Apellido/s</th>
+      <th>DNI</th>
+      <th>Nombre/s</th>
+      <th>Apellido/s</th>
       <th>Acción</th>
     </tr>
   </thead>
-  <tbody class="text-dark">
+  <tbody>
     {% for elector in object_list %}
       <tr>
-        <td  class="text-right">{{elector.dni}}</td>
-        <td class="text-right">{{elector.names}}</td>
-        <td class="text-left">{{elector.surnames}}</td>
+        <th>{{elector.dni}}</td>
+        <th>{{elector.names}}</td>
+        <th>{{elector.surnames}}</td>
         <td>
           <!-- If record is active -->
           {% if elector.active %}

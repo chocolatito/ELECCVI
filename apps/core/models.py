@@ -1,8 +1,9 @@
 import uuid
 import datetime
-
+from datetime import datetime as dt
 
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.contrib.auth.models import User
@@ -21,7 +22,7 @@ class BaseCore(models.Model):
         abstract = True
 
 
-ELECCION_ESTATUS = [(1, "Aún no ha iniciado."), (2, "En curso"),
+ELECCION_ESTATUS = [(0, "Pendiente"), (1, "Programada"), (2, "En curso"),
                     (3, "Finalizada"), (4, "Suspendida"), (5, "Potergada")]
 
 
@@ -31,7 +32,7 @@ class Eleccion(BaseCore):
     start_time = models.TimeField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)
     slug = models.SlugField(max_length=50, null=False, blank=False, unique=True)
-    eleccion_estatus = models.IntegerField(choices=ELECCION_ESTATUS, default=1)
+    eleccion_estatus = models.IntegerField(choices=ELECCION_ESTATUS, default=0)
     # Relationships
     eleccion_padron = models.ForeignKey('Padron', on_delete=models.SET_NULL, null=True)
     eleccion_cargo = models.ForeignKey('Cargo', on_delete=models.SET_NULL, null=True)
@@ -49,6 +50,34 @@ class Eleccion(BaseCore):
         verbose_name = 'Eleccion'
         verbose_name_plural = 'Elecciones'
 
+    def get_field_values(self):
+        if self.eleccion_estatus == 0:
+            return [self.title, self.eleccion_cargo,
+                    self.date.strftime("%d-%m-%Y"),
+                    '00:00-00:00',
+                    self.get_eleccion_estatus_display()]
+        else:
+            return [self.title, self.eleccion_cargo,
+                    self.date.strftime("%d-%m-%Y"),
+                    f'{self.start_time.strftime("%H:%M")}-{self.end_time.strftime("%H:%M")}',
+                    self.get_eleccion_estatus_display()]
+
+    def get_start_datetime(self):
+        return dt.strptime(f'{self.date.strftime("%Y %m %d")} {self.start_time.strftime("%H %M")}',
+                           "%Y %m %d %H %M")
+
+    def get_end_datetime(self):
+        return dt.strptime(f'{self.date.strftime("%Y %m %d")} {self.end_time.strftime("%H %M")}',
+                           "%Y %m %d %H %M")
+
+    def get_date_time(self):
+        return [int(x)
+                for x in
+                f'{self.date.strftime("%Y %m %d")} {self.start_time.strftime("%H %M")}'.split(" ")]
+
+    def get_absolute_url(self):
+        return reverse('core:candidato-detail', args=[str(self.id)])
+
     def __str__(self):
         return "{} - {}".format(self.date, self.title)
 
@@ -64,6 +93,9 @@ class Cargo(BaseCore):
     class Meta:
         verbose_name = "Cargo"
         verbose_name_plural = "Cargos"
+
+    def get_field_values(self):
+        return [self.name, self.description]
 
     def __str__(self):
         return "{}".format(self.name)
@@ -85,6 +117,15 @@ class Candidato(BaseCore):
         ordering = ['candidato_cargo', 'postulation_date']
         verbose_name = "Candidato"
         verbose_name_plural = "Candidatos"
+
+    def get_absolute_url(self):
+        return reverse('core:edit-candidato', args=[str(self.id)])
+
+    def get_field_values(self):
+        return [self.postulation_date,
+                self.candidato_cargo,
+                self.candidato_elector,
+                self.candidato_eleccion]
 
     def __str__(self):
         return "{} - {}".format(self.candidato_elector.dni, self.candidato_cargo.name)
@@ -108,6 +149,9 @@ class Elector(BaseCore):
     def get_field_values(self):
         return [self.dni, self.names, self.surnames, self.user]
 
+    def get_field_values_for_padron(self):
+        return [self.dni, self.names, self.surnames]
+
     def __str__(self):
         return "{} - {}, {}".format(self.dni, self.names, self.surnames)
 
@@ -124,6 +168,9 @@ class Padron(BaseCore):
         verbose_name = "Padron"
         verbose_name_plural = "Padrones"
 
+    def get_absolute_url(self):
+        return reverse('core:padron-detail', args=[str(self.id)])
+
     def get_field_values(self):
         return [self.title, self.date, self.slug]
 
@@ -132,7 +179,7 @@ class Padron(BaseCore):
         return "{}_{}".format(self.date, self.id)
 
     def __str__(self):
-        return "{}/{}".format(self.date, self.id, self.title)
+        return "{}/{} {}".format(self.date, self.id, self.title)
 
 
 class Sufragio(BaseCore):

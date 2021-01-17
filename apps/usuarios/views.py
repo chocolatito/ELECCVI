@@ -7,13 +7,15 @@ from django.contrib.auth import (authenticate,
 from django.contrib.auth.models import User
 from django.views.generic.edit import CreateView
 
+
 from .forms import UserForm
 from apps.core.forms import ElectorCreateForm
+# Create your views here.
 
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('index')
+        return redirect('index:index')
     if request.method == 'POST':
         # el atributo POST es un diccionario
         username = request.POST.get('username')
@@ -34,7 +36,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     print('Sesion cerrada exitosamente')
-    return redirect('core:index')
+    return redirect('index:index')
 
 
 class UserCreateView(CreateView):

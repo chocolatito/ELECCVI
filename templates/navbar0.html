@@ -1,0 +1,27 @@
+<!-- A grey horizontal navbar that becomes vertical on small screens -->
+<nav class="navbar navbar-expand-sm bg-pink">
+  <!-- Links -->
+  <ul class="navbar-nav">
+  {% if user.is_authenticated %}
+    <li class="nav-item">
+      <a class="nav-link btn btn-outline-info mr-1" href={% url 'core:eleccion-list' %}>Elecciones</a>
+    <li class="nav-item">
+      <a class="nav-link btn btn-outline-info mr-1" href="#">Candidatos</a>
+    <li class="nav-item">
+      <a class="nav-link btn btn-outline-info mr-1" href={% url 'core:cargo-list' %}>Cargos</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link btn btn-outline-info mr-1" href={% url 'core:padron-list' %}>Padrones</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link btn btn-outline-info mr-1" href={% url 'core:elector-list' %}>Electores</a>
+    </li>
+  </ul>
+  <ul class="nav navbar-nav ml-auto">
+    <li class="navbar-item">
+      <a class="nav-link btn btn-outline-danger" href={% url 'logout' %}>Logout</a>
+    </li>
+  </ul>
+
+{% endif %}
+</nav>

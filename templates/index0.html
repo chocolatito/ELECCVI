@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="row">
+      <div class="col-sm-2">
+
+      </div>
+      <div class="col-sm-4 border border-primary rounded bg-light">
+        <h2><u>Resumen</u>:</h2>
+        <ul class="list-group">
+        {% for entry, value in sumary.items %}
+          <li class="list-group-item d-flex justify-content-between align-items-center mb-1">
+            {{entry}}:
+            {% if value %}
+             <span class="badge badge-primary badge-pill">
+               <a href="#"><h3>{{value}}</h3> </a>
+             </span>
+            {% else %}
+              <span>No hay registros, <a href="#">Registrar Ahora</a></span>
+            {% endif %}
+          </li>
+        {% endfor %}
+        </ul>
+      </div>
+      <div class="col">
+
+      </div>
+    </div>
+{% endblock %}

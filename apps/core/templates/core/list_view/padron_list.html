@@ -1,0 +1,11 @@
+{% extends "list_base.html" %}
+{% load static %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item active"><a href={% url 'core:padron-list' %}>
+    <b>{{entity}}</b>
+  </a></li>
+{% endblock %}
+{% block object_list %}
+  {% include "core/snippets/table.html" %}
+{% endblock %}
