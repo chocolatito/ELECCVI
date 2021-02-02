@@ -27,6 +27,17 @@ from .utils import (set_active,
 
 
 # _Eleccion
+
+class EleccionEnCurso(LoginRequiredMixin, DetailView):
+    model = Eleccion
+    template_name = "core/detail_view/eleccion_encurso.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = "Eleccion"
+        return context
+
+
 class EleccionListView(LoginRequiredMixin, ListView):
     model = Eleccion
     template_name = "core/list_view/eleccion_list.html"

@@ -3,6 +3,7 @@ from .views import (CandidatoListView,
                     active_candidato, deactive_candidato,
                     CargoListView, CargoCreateView, CargoUpdateView,
                     active_cargo, deactive_cargo,
+                    EleccionEnCurso,
                     EleccionListView, EleccionDetailView,
                     EleccionCreateView, EleccionUpdateView,
                     active_eleccion, deactive_eleccion,
@@ -42,7 +43,8 @@ urlpatterns = [
     path('cargos/', CargoListView.as_view(), name='cargo-list'),
     path('cargos/active/<int:pk>', active_cargo, name='active_cargo'),
     path('cargos/deactive/<int:pk>', deactive_cargo, name='deactive_cargo'),
-    # Eleccion EleccionProgramar
+    # Eleccion EleccionEnCurso
+    path('eleccion/<int:pk>/', EleccionEnCurso.as_view(), name='eleccion-encurso')
     path('elecciones/', EleccionListView.as_view(), name='eleccion-list'),
     path('eleccion/<int:pk>/', EleccionDetailView.as_view(), name='eleccion-detail'),
     path('create_eleccion/', EleccionCreateView.as_view(), name='create-eleccion'),
