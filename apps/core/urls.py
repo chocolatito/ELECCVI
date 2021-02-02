@@ -44,7 +44,7 @@ urlpatterns = [
     path('cargos/active/<int:pk>', active_cargo, name='active_cargo'),
     path('cargos/deactive/<int:pk>', deactive_cargo, name='deactive_cargo'),
     # Eleccion EleccionEnCurso
-    path('eleccion/<int:pk>/', EleccionEnCurso.as_view(), name='eleccion-encurso')
+    path('eleccion/<int:pk>/', EleccionEnCurso.as_view(), name='eleccion-encurso'),
     path('elecciones/', EleccionListView.as_view(), name='eleccion-list'),
     path('eleccion/<int:pk>/', EleccionDetailView.as_view(), name='eleccion-detail'),
     path('create_eleccion/', EleccionCreateView.as_view(), name='create-eleccion'),
