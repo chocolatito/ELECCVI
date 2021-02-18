@@ -14,21 +14,22 @@ import os
 import environ
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
+#
 # environ init
 env = environ.Env()
 environ.Env.read_env()
-print(env.str('SECRET_KEY'))
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
+# ____________________
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.str('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
 DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = tuple(env.list('ALLOWED_HOSTS', default=[]))
@@ -43,12 +44,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # apps
-    'apps.core',
+    # developed apps
     'apps.index',
     'apps.usuarios',
-    # library
+    'apps.padron',
+    'apps.eleccion',
+    'apps.votacion',
+    # LIBRARIES
+    # for import/export data with included Django admin.
     'import_export',
+    # A multiprocessing task queue for Django
     'django_q',
 ]
 
@@ -75,8 +80,7 @@ ROOT_URLCONF = 'conf.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
-        'DIRS': ["/home/danielivan/EleccionVirtual/templates", ],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -129,7 +133,6 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-#STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-#print(f'***********\n{STATIC_URL}\n\t{STATICFILES_DIRS}')
-print(BASE_DIR)
+STATICFILES_DIRS = [(os.path.join(BASE_DIR, "static"))]
+# STATIC_ROOT only required for deployment.
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static'))

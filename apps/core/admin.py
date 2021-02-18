@@ -12,7 +12,7 @@ from .models import (Eleccion,
                      Cargo,
                      Candidato,
                      Padron,
-                     Sufragio)
+                     Sufragio, Voto)
 
 
 # Register your models here.
@@ -80,11 +80,14 @@ class PadronAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 admin.site.register(Padron, PadronAdmin)
 
+
 #
-
-
 class SufragioAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('hash', 'voting_time')
 
 
 admin.site.register(Sufragio, SufragioAdmin)
+
+
+#
+admin.site.register(Voto)

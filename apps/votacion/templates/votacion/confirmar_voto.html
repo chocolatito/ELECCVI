@@ -1,0 +1,19 @@
+{% extends "index.html" %}
+
+{% block main %}
+
+<div class="container-fluid">
+  <h1 class="mt-4">CONFIRMAR</h1>
+
+  <ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active">CONFIRMAR</li>
+  </ol>
+  <form class="" method="post">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit" name="button" value={{pk}}>CONFIRMAR</button>
+    <button class="btn btn-danger" type="submit" name="button" value=0>CANCELAR</button>
+  </form>
+
+</div>
+
+{% endblock %}

@@ -1,44 +1,40 @@
-from django.urls import reverse_lazy
+# from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.contrib.auth import (authenticate,
-                                 login,
-                                 logout)
-from django.contrib.auth.models import User
-from django.views.generic.edit import CreateView
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.views import LoginView
 
-
-from .forms import UserForm
-from apps.core.forms import ElectorCreateForm
+# from django.contrib.auth.models import User
+# from django.views.generic.edit import CreateView
+#
+# from .forms import UserForm
+# from apps.core.forms import ElectorCreateForm
 # Create your views here.
 
 
-def login_view(request):
-    if request.user.is_authenticated:
-        return redirect('index:index')
-    if request.method == 'POST':
-        # el atributo POST es un diccionario
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+class LoginFormView(LoginView):
+    template_name = 'users/login.html'
 
-        user = authenticate(username=username, password=password)
-        if user:
-            login(request, user)
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
             if request.GET.get('next'):
                 return HttpResponseRedirect(request.GET.get('next'))
-    return render(request,
-                  'users/login.html',
-                  context={
-                      'title': 'Login', }
-                  )
+            else:
+                return redirect('index:index')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = "Iniciar Sesión"
+        return context
 
 
 def logout_view(request):
     logout(request)
-    print('Sesion cerrada exitosamente')
     return redirect('index:index')
 
 
+"""
 class UserCreateView(CreateView):
     model = User
     form_class = UserForm
@@ -65,3 +61,4 @@ class UserCreateView(CreateView):
         context['formU'] = self.form_class
         context['formE'] = ElectorCreateForm
         return context
+"""

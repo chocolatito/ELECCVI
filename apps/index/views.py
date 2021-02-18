@@ -1,46 +1,39 @@
-from django.shortcuts import render
-from django.urls import reverse_lazy
+# from django.shortcuts import render
+# from django.urls import reverse_lazy
+#
+from django.views.generic import TemplateView
+from django.utils.decorators import method_decorator
+#
 from django.contrib.auth.decorators import login_required
-
-from apps.core.models import Padron, Elector, Cargo, Eleccion, Candidato
-from .utils import get_index_sumary
-
+#
+from ..eleccion.models import Eleccion
 # Create your views here.
 
+# decorators = [login_required, group_required('administracion',)]
+decorators = [login_required(login_url='usuarios:login'), ]
 
-@login_required(login_url='usuarios:login')
-def index(request):
-    sumary = {'usuarios': 15,
-              'articulos': 0,
-              'autores': 7}
-    list_urls = {'usuarios': "reverse_lazy('core:usuario-list')",
-                 'articulos': "reverse_lazy('core:articulo-list')",
-                 'autores': "reverse_lazy('core:autor-list')"}
-    print(sumary)
-    for entry, value in sumary.items():
-        if value:
-            print(f'Total de registros de {entry}: {value}')
-        else:
-            print(list_urls[entry])
 
-    return render(request, 'index.html',
-                  {'title': 'Bienvenido',
-                   'sumary':
-                   {'Padrones': get_index_sumary(Padron.objects.all(),
-                                                 'core:padron-list',
-                                                 'core:create-padron'),
-                    'Electores': get_index_sumary(Elector.objects.all(),
-                                                  'core:elector-list',
-                                                  'core:create-elector'),
-                    'Cargos': get_index_sumary(Cargo.objects.all(),
-                                               'core:cargo-list',
-                                               'core:create-cargo'),
-                    'Elecciones': get_index_sumary(Eleccion.objects.all(),
-                                                   'core:eleccion-list',
-                                                   'core:create-eleccion'),
-                    'Candidatos': get_index_sumary(Candidato.objects.all(),
-                                                   'index:index',
-                                                   'core:create-candidato')
-                    },
-                   }
-                  )
+@method_decorator(decorators, name='dispatch')
+class Index(TemplateView):
+    template_name = "index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Bienvenido'
+        # method for utils.py
+        context['upcoming_elecciones'] = Eleccion.objects.filter(status=1)
+        context['current_elecciones'] = Eleccion.objects.filter(status=2)
+        #context['current_elecciones'] = Eleccion.objects.filter(status=2)
+        print(context)
+        return context
+
+
+# decoratorsAdm = [login_required, group_required('administracion',)]
+# @method_decorator(decoratorsAdm, name='dispatch')
+class Sumary(TemplateView):
+    template_name = "sumary.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Resumen'
+        return context

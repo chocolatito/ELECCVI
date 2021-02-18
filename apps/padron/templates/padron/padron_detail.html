@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block main %}
+<div class="container-fluid">
+  <ol class="breadcrumb mt-2">
+    {% block breadcrumb %}
+    <li class="breadcrumb-item active">
+      <a href={% url 'padron:padron-list' %}>Padrones</a></li>
+    <li class="breadcrumb-item">{{object}}</li>
+    {% endblock %}
+  </ol>
+  {% if object  %}
+  <div class="container-fluid d-flex justify-content-between">
+    <form method="post">
+      {% csrf_token %}
+      <!-- Padron Card -->
+      <div class="card mt-2">
+        {% if object.electores.all %}
+        <div class="card-header d-flex justify-content-between">
+          <div class="col">
+            <p><b>Electores del padron</b></p>
+          </div>
+          <div class="col">
+            <button type="submit" class="btn btn-block btn-danger" name="remove">Quitar Seleccionado/s</button>
+          </div>
+        </div>
+        <div class="card-body">
+          {% comment %}
+          include "padron/snippets/table.html" with
+          table_id="data"
+          electores=object.electores.all
+          checkbox_id="checkall_enabled"
+          checkbox_name="elector_enabled"
+          {% endcomment %}
+          {% include "padron/snippets/padron_table.html" with table_id="data1" checkbox_id="checkall_enabled" checkbox_name="elector_enabled" electores=object.electores.all%}
+        </div>
+        {% else %}
+        <div class="card-header d-flex content-justify-between bg-secondary text-light">
+          <p><b>PADRON SIN ELECTORES</b></p>
+        </div>
+        <div class="card-body bg-light">
+          <p><b>SELECCIONE A LOS ELECTORES PARA AÑADIR AL PADRON</b></p>
+        </div>
+        {% endif %}
+      </div>
+      <!-- /Padron Card -->
+    </form>
+    <form method="post">
+      {% csrf_token %}
+      <!-- Electores excluded from Padron -->
+      <div class="card mt-2">
+        {% if expelled.all %}
+        <div class="card-header d-flex content-justify-between">
+          <div class="col">
+            <p><b>Resto de los electores</b></p>
+          </div>
+          <div class="col">
+            <button type="submit" class="btn btn-primary" name="add">Incluir Seleccionado/s</button>
+          </div>
+        </div>
+        <!-- Expelled Table -->
+
+        <div class="card-body">
+          {% comment %}
+          include "padron/snippets/table.html" with
+          table_id="data2"
+          electores=expelled.all
+          checkbox_id="checkall_disabled"
+          checkbox_name="elector_disabled"
+          table_class="table bg-primary text-light"
+          {% endcomment %}
+          {% include "padron/snippets/padron_table.html" with table_id="data2" checkbox_id="checkall_disabled" checkbox_name="elector_disabled" electores=expelled.all %}
+        </div>
+        {% else %}
+        <div class="card-header d-flex content-justify-between bg-primary text-light">
+          <p><b>Resto de los electores</b></p>
+        </div>
+        <div class="card-body bg-light">
+          <p><b>TODOS LOS ELECTORES HABILITADOS ESTAN EN EL PADRON</b></p>
+        </div>
+        {% endif %}
+      </div>
+      <!-- /Electores excluded from Padron -->
+    </form>
+  </div>
+  {% else %}
+  <h3>Mal</h3>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block script_dataTable %}
+<script type="text/javascript">
+  // Call the dataTables jQuery plugin
+  $(document).ready(function() {
+    var tabla1 = iniciarDataTable('data1');
+    var tabla2 = iniciarDataTable('data2');
+    var tabla3 = iniciarDataTable('data3');
+    $("#eleccion-list a").on("click", function(e) {
+      e.preventDefault();
+      $(this).tab("show");
+      var referencia = $(event.target).attr("href");
+      if (referencia == "#pasadas")
+        tabla1.columns.adjust();
+      if (referencia == "#proximas")
+        tabla2.columns.adjust();
+      if (referencia == "#encurso")
+        tabla3.columns.adjust();
+    });
+  });
+  // https://es.stackoverflow.com/questions/144360/datatables-en-tabs-dinamicas-se-inicializan-mal
+  function iniciarDataTable(id) {
+    var table = $('#' + id).DataTable({
+      "scrollY": "400px",
+      "scrollCollapse": true,
+      "paging": false,
+      scrollX: true,
+    });
+    return table;
+  };
+</script>
+{% include "padron/snippets/datatable_script_checkall.html" %}
+{% endblock %}

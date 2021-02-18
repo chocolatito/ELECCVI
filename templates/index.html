@@ -2,52 +2,72 @@
 {% block title %}{{title}}{% endblock %}
 {% block main %}
 <div class="container-fluid">
-  <h1 class="mt-4">Resumen</h1>
+  <h1 class="mt-4">Bienvenido {{user}}</h1>
 
   <ol class="breadcrumb mb-4">
-    <li class="breadcrumb-item active">Resumen</li>
+    <li class="breadcrumb-item active">Elecciones</li>
   </ol>
-
+  <!--Proximas elecciones-->
+  {% if upcoming_elecciones %}
   <div class="row">
-    {% for entry, value in sumary.items %}
-    <div class="col-xl-6 col-md-12">
-      {% if value.0 %}
-      <div class="card bg-primary text-white mb-4">
-        <div class="card-header text-center"><b>{{entry}}</b></div>
-        <div class="card-body bg-primary">
-          <ul>
-            <li>Total: {{value.0}}</li>
-            <li>Activos: {{value.1}}</li>
-            <li>Inactivos: {{value.2}}</li>
-          </ul>
-        </div>
-        <div class="card-footer d-flex justify-content-between">
-          <a class="small text-white" href={% url value.3 %}>
-            <b>Listado</b>
-          </a>
-          <a class="small text-white" href={% url value.4 %}>
-            <b>Registrar</b>
-          </a>
-        </div>
-      </div>
-      {% else %}
-      <div class="card bg-warning text-white mb-4">
-        <div class="card-header text-center"><b>{{entry}}</b></div>
-        <div class="card-body">
-          <h4>No hay registros de {{entry}}</h4><br>
-        </div>
-        <div class="card-footer d-flex justify-content-center">
-          <a class="small text-white" href={% url value.1 %}>
-            <b>Registrar Ahora</b>
-          </a>
-        </div>
-      </div>
-      {% endif %}
+    <h3 class="mt-4">Proximas elecciones:</h3>
+    <div class="list-group">
+      {% for upcoming in upcoming_elecciones %}
+      <a class="list-group-item list-group-item-action" href={% url 'votacion:votacion' upcoming.slug %}>{{upcoming}}</a>
+      <a class="btn btn-primary" href={% url 'votacion:votacion' upcoming.slug %}>Votar</a>
+      {% endfor %}
     </div>
-    {% endfor %}
-
-
   </div>
+  {% endif %}
+  <!-- ./Proximas elecciones-->
+  <!--Elecciones en curso-->
+  {% if current_elecciones %}
+  <div class="row">
+    <h3 class="h3 mt-4">Elecciones en Curso:</h3>
+  </div>
+  <div class="row-fluid">
+    <div class="list-group">
+      {% for current in current_elecciones %}
+        <li class="list-group-item d-flex justify-content-between">
+        <a href={% url 'votacion:votacion' current.slug %}><b>{{current}}</b></a>
+        <a class="btn btn-primary" href={% url 'votacion:votacion' current.slug %}>Votar</a>
+      </li>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  <!-- ./Elecciones en curso-->
 </div>
 <!-- /container-fluid -->
+{% endblock %}
+{% block script_dataTable %}
+<script type="text/javascript">
+  // Call the dataTables jQuery plugin
+  $(document).ready(function() {
+    var tabla1 = iniciarDataTable('data1');
+    var tabla2 = iniciarDataTable('data2');
+    var tabla3 = iniciarDataTable('data3');
+    $("#eleccion-list a").on("click", function(e) {
+      e.preventDefault();
+      $(this).tab("show");
+      var referencia = $(event.target).attr("href");
+      if (referencia == "#pasadas")
+        tabla1.columns.adjust();
+      if (referencia == "#pendientes")
+        tabla2.columns.adjust();
+      if (referencia == "#programadas")
+        tabla3.columns.adjust();
+    });
+  });
+  // https://es.stackoverflow.com/questions/144360/datatables-en-tabs-dinamicas-se-inicializan-mal
+  function iniciarDataTable(id) {
+    var table = $('#' + id).DataTable({
+      "scrollY": "400px",
+      "scrollCollapse": true,
+      "paging": false,
+      scrollX: true,
+    });
+    return table;
+  };
+</script>
 {% endblock %}

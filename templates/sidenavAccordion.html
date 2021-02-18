@@ -1,60 +1,44 @@
 <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
   <div class="sb-sidenav-menu">
+
     <div class="nav">
+      <div class="sb-sidenav-menu-heading">ADMIN</div>
+      <a class="nav-link" href={% url 'admin:index' %}>
+        Admin Site
+      </a>
       <div class="sb-sidenav-menu-heading">DATA</div>
       <a class="nav-link" href={% url 'index:index' %}>
         <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
         Resumen
       </a>
-      <!-- nav-link collapsed Ver Registros collapseLayouts-->
-      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#VerRegistros" aria-expanded="false" aria-controls="VerRegistros">
+      <!-- nav-link collapsed Gestión de Padrón -->
+      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#Padron" aria-expanded="false" aria-controls="Padron">
         <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-        Ver Registros
+        Gestión de Padrón
         <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
       </a>
-      <div class="collapse" id="VerRegistros" aria-labelledby="headingOne" data-parent="#sidenavAccordion">
+      <div class="collapse" id="Padron" aria-labelledby="headingOne" data-parent="#sidenavAccordion">
         <nav class="sb-sidenav-menu-nested nav">
-          <a class="nav-link" href={% url 'core:candidato-list' %}>Candidatos</a>
-          <a class="nav-link" href={% url 'core:cargo-list' %}>Cargo</a>
-          <a class="nav-link" href={% url 'core:elector-list' %}>Electores</a>
-          <a class="nav-link" href={% url 'core:eleccion-list' %}>Elecciones Pasadas</a>
-          <a class="nav-link" href={% url 'core:eleccion-list' %}>Elecciones Futuras</a>
-          <a class="nav-link" href={% url 'core:padron-list' %}>Padron</a>
+          <a class="nav-link" href={% url 'padron:padron-list' %}>Padrones</a>
+          <a class="nav-link" href={% url 'padron:elector-list' %}>Electores</a>
         </nav>
       </div>
-      <!-- nav-link collapsed Ver Registros -->
+      <!-- /nav-link collapsed Gestión de Padrón -->
 
-      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
+      <!-- nav-link collapsed Gestión de Elección -->
+      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#Eleccion" aria-expanded="false" aria-controls="collapsePages">
         <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-        Pages
+        Gestión de Elección
         <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
       </a>
-      <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-parent="#sidenavAccordion">
-        <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
-          <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
-            Authentication
-            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-          </a>
-          <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-parent="#sidenavAccordionPages">
-            <nav class="sb-sidenav-menu-nested nav">
-              <a class="nav-link" href="login.html">Login</a>
-              <a class="nav-link" href="register.html">Register</a>
-              <a class="nav-link" href="password.html">Forgot Password</a>
-            </nav>
-          </div>
-          <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
-            Error
-            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-          </a>
-          <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-parent="#sidenavAccordionPages">
-            <nav class="sb-sidenav-menu-nested nav">
-              <a class="nav-link" href="401.html">401 Page</a>
-              <a class="nav-link" href="404.html">404 Page</a>
-              <a class="nav-link" href="500.html">500 Page</a>
-            </nav>
-          </div>
+      <div class="collapse" id="Eleccion" aria-labelledby="headingOne" data-parent="#sidenavAccordion">
+        <nav class="sb-sidenav-menu-nested nav">
+          <a class="nav-link" href={% url 'eleccion:cargo-list' %}>Cargos</a>
+          <a class="nav-link" href={% url 'eleccion:candidato-list' %}>Candidatos</a>
+          <a class="nav-link" href={% url 'eleccion:eleccion-list' %}>Elecciones</a>
         </nav>
       </div>
+      <!-- ./nav-link collapsed Gestión de Elección -->
       <div class="sb-sidenav-menu-heading">Conteos</div>
       <a class="nav-link" href="charts.html">
         <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>

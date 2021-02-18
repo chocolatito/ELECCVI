@@ -13,8 +13,8 @@ def set_active(obj, estate):
     return None
 
 
-def set_estatus(obj, state):
-    obj.eleccion_estatus = state
+def set_status(obj, state):
+    obj.status = state
     obj.save()
 
 

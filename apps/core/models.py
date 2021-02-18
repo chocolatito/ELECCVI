@@ -201,6 +201,20 @@ class Sufragio(BaseCore):
         return "{} - {} - {}".format(self.sufragio_elector, self.voting_time, self.hash)
 
 
+class Voto(BaseCore):
+    candidato = models.OneToOneField('Candidato',
+                                     on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        ordering = ['candidato', ]
+        verbose_name = "Voto"
+        verbose_name_plural = "Votos"
+
+    def __str__(self):
+        return "{}".format(self.candidato)
+# _____________________________________________________
+
+
 def set_slug_Padron(sender, instance, *args, **kwargs):
     print(slugify(f'{instance.date}__{instance.id}_{instance.title}'))
     if instance.id and instance.title and instance.date and not instance.slug:

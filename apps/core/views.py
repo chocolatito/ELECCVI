@@ -3,10 +3,12 @@ from .forms import (ElectorCreateForm, ElectorEditForm,
                     CargoForm,
                     EleccionForm, EleccionProgamadaForm,
                     CandidatoForm)
-from .models import Padron, Elector, Cargo, Eleccion, Candidato
+from .models import Padron, Elector, Cargo, Eleccion, Candidato, Voto
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+#
+from django.utils.decorators import method_decorator
 #
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,6 +16,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.base import TemplateView
 ##
 from django_q.models import Schedule
 from .utils import (set_active,
@@ -22,19 +25,48 @@ from .utils import (set_active,
                     enable_form,
                     set_estatus,
                     )
+from .decorators import group_required
 # from .schedule import scheduleTask, stopScheduleTask
 # Create your views here.
 
 
 # _Eleccion
+decorators = [login_required, group_required('administracion',)]
 
+
+@method_decorator(decorators, name='dispatch')
 class EleccionEnCurso(LoginRequiredMixin, DetailView):
     model = Eleccion
     template_name = "core/detail_view/eleccion_encurso.html"
 
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        return redirect('core:confirmar', pk=request.POST['button'])
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = "Eleccion"
+        return context
+
+
+class Confirmar(TemplateView):
+    template_name = "core/detail_view/confirmar_voto.html"
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        if request.POST['button'] == "0":
+            Voto.objects.create(candidato=None)
+            print("CANCELADO\n")
+            return redirect("/")
+        else:
+            print("CONFIRMADO\n")
+            candidato = Candidato.objects.get(id=request.POST['button'])
+            Voto.objects.create(candidato=candidato)
+            return redirect("/")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(kwargs)
         return context
 
 
@@ -48,14 +80,17 @@ class EleccionListView(LoginRequiredMixin, ListView):
         context['entity'] = "Elecciones pasadas"
         context['message_no_queryset'] = 'No hay elecciones pasadas registradas'
         context['elecciones_pasadas'] = get_queryset_for_estatus(self.model,
-                                                                 self.request.GET.get('estado'),
+                                                                 self.request.GET.get(
+                                                                     'estado'),
                                                                  [3, 4])
         context['elecciones_pendientes'] = get_queryset_for_estatus(self.model,
-                                                                    self.request.GET.get('estado'),
+                                                                    self.request.GET.get(
+                                                                        'estado'),
                                                                     [0, ])
 
         context['elecciones_programadas'] = get_queryset_for_estatus(self.model,
-                                                                     self.request.GET.get('estado'),
+                                                                     self.request.GET.get(
+                                                                         'estado'),
                                                                      [1, 2])
         context['estado'] = self.request.GET.get('estado')
         context['create_url'] = 'core:create-eleccion'
@@ -64,7 +99,8 @@ class EleccionListView(LoginRequiredMixin, ListView):
         context['edit_url'] = 'core:edit-eleccion'
         context['active_url'] = 'core:active_eleccion'
         context['deactive_url'] = 'core:deactive_eleccion'
-        context['thead'] = ['Eleccion', 'Cargo', 'Fecha', 'Inicio-Cierre', 'Estado']
+        context['thead'] = ['Eleccion', 'Cargo',
+                            'Fecha', 'Inicio-Cierre', 'Estado']
         return context
 
 
@@ -152,7 +188,8 @@ class EleccionProgramar(UpdateView):
                                          next_run=obj.get_end_datetime()
                                          )
             print(f'\nTaraea 1: {t1.next_run}\nTaraea 2: {t2.next_run}---\n')
-            print(f'\nFin{obj.get_end_datetime()}\nInicio: {obj.get_start_datetime()}')
+            print(
+                f'\nFin{obj.get_end_datetime()}\nInicio: {obj.get_start_datetime()}')
             #
             return redirect('core:eleccion-detail', pk=obj.id)
         self.object = None
@@ -191,8 +228,6 @@ def posponer_eleccion(request, pk):
 
 
 # _Elector
-
-
 class ElectorListView(ListView):
     model = Elector
     template_name = "core/list_view/elector_list.html"
@@ -289,7 +324,8 @@ class PadronDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = "Padron"
-        id_list = list(self.object.electores.all().values_list('id', flat=True))
+        id_list = list(
+            self.object.electores.all().values_list('id', flat=True))
         context['expelled'] = Elector.objects.exclude(id__in=id_list)
         context['thead'] = ['DNI', 'Nombre/s', 'Apellido/s']
         return context
@@ -439,7 +475,8 @@ class CandidatoListView(LoginRequiredMixin, ListView):
         context['estado'] = self.request.GET.get('estado')
         context['create_url'] = 'core:create-candidato'
         context['list_url'] = 'core:candidato-list'
-        context['detail_url'] = 'core:edit-candidato'  # 'core:candidato-detail'
+        # 'core:candidato-detail'
+        context['detail_url'] = 'core:edit-candidato'
         context['edit_url'] = 'core:edit-candidato'
         context['active_url'] = 'core:active_candidato'
         context['deactive_url'] = 'core:deactive_candidato'

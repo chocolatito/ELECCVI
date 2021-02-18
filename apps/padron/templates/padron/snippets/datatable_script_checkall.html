@@ -1,0 +1,24 @@
+<script>
+  // Si se hace click sobre el input de tipo checkbox con id checkall_enabled
+  $('#checkall_enabled').click(function() {
+      // Si esta seleccionado (si la propiedad checked es igual a true)
+      if ($(this).prop('checked')) {
+          // Selecciona cada input que tenga la nombre .elector_enabled
+          $('input[name$="elector_enabled"]').prop('checked', true);
+      } else {
+          // Deselecciona cada input que tenga la clase .checar
+          $('input[name$="elector_enabled"]').prop('checked', false);
+      }
+  });
+  // Si se hace click sobre el input de tipo checkbox con id checkb
+  $('#checkall_disabled').click(function() {
+      // Si esta seleccionado (si la propiedad checked es igual a true)
+      if ($(this).prop('checked')) {
+          // Selecciona cada input que tenga la clase .checar
+          $('input[name$="elector_disabled"]').prop('checked', true);
+      } else {
+          // Deselecciona cada input que tenga la clase .checar
+          $('input[name$="elector_disabled"]').prop('checked', false);
+      }
+  });
+</script>

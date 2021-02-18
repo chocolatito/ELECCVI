@@ -1,0 +1,30 @@
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+<div class="container-fluid">
+  <h1 class="mt-4">{{page}}</h1>
+  {% if object_list %}
+  <div class="card">
+    <div class="card-header d-flex justify-content-between bg-light">
+      {% include "padron/snippets/new-act-deact.html"%}
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        {% include "padron/snippets/table.html" %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  {% include "padron/snippets/no_objetc_list.html" %}
+  {% endif %}
+</div>
+<!-- /container-fluid -->
+{% endblock %}
+
+{% block script_dataTable %}
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('#data1').DataTable();
+  });
+</script>
+{% endblock %}

@@ -1,5 +1,4 @@
 from .base import *
-print(f"{env.str('USER')}:{env.str('PASSWORD')}")
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
