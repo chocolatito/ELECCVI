@@ -11,12 +11,17 @@
   {% if upcoming_elecciones %}
   <div class="row">
     <h3 class="mt-4">Proximas elecciones:</h3>
+  </div>
+  <div class="row-fluid">
     <div class="list-group">
-      {% for upcoming in upcoming_elecciones %}
-      <a class="list-group-item list-group-item-action" href={% url 'votacion:votacion' upcoming.slug %}>{{upcoming}}</a>
-      <a class="btn btn-primary" href={% url 'votacion:votacion' upcoming.slug %}>Votar</a>
-      {% endfor %}
+    {% for upcoming in upcoming_elecciones %}
+      <li class="list-group-item d-flex justify-content-between">
+        <a href={% url 'votacion:votacion' upcoming.slug %}><b>{{upcoming}}</b></a>
+        <a class="btn btn-primary" href={% url 'votacion:votacion' upcoming.slug %}>Ver Candidatos</a>
+      </li>
+    {% endfor %}
     </div>
+
   </div>
   {% endif %}
   <!-- ./Proximas elecciones-->
